@@ -3,15 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FitCoach AI - 正式版</title>
+    <title>FitCoach AI - 穩定版</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+HK:wght@400;700;900&display=swap');
-        body { font-family: 'Noto+Sans+HK', sans-serif; background-color: #f1f5f9; }
+        body { font-family: 'Noto+Sans+HK', sans-serif; background-color: #f8fafc; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-        .nav-btn.active { color: #2563eb; border-bottom: 3px solid #2563eb; }
-        .mentor-card { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); }
+        .nav-btn.active { color: #2563eb; border-bottom: 2px solid #2563eb; }
     </style>
 </head>
 <body class="min-h-screen pb-20">
@@ -29,26 +28,23 @@
 
         <div id="tab-profile" class="tab-content active space-y-4">
             <div class="bg-white p-6 rounded-[32px] shadow-sm border border-slate-100">
-                <h2 class="text-lg font-black text-slate-800 mb-4 text-center">你的私人減肥導師</h2>
+                <h2 class="text-lg font-black text-slate-800 mb-4">輸入個人資料</h2>
                 <div class="space-y-4">
                     <div class="grid grid-cols-2 gap-3">
-                        <input type="number" id="age" placeholder="年齡" class="w-full p-3 bg-slate-50 rounded-2xl border-0 text-sm outline-none">
-                        <input type="number" id="height" placeholder="身高(cm)" class="w-full p-3 bg-slate-50 rounded-2xl border-0 text-sm outline-none">
+                        <input type="number" id="age" placeholder="年齡" class="w-full p-3 bg-slate-50 rounded-2xl border-0 text-sm">
+                        <input type="number" id="height" placeholder="身高(cm)" class="w-full p-3 bg-slate-50 rounded-2xl border-0 text-sm">
                     </div>
                     <div class="grid grid-cols-2 gap-3">
-                        <input type="number" id="weight" placeholder="現時體重(kg)" class="w-full p-3 bg-slate-50 rounded-2xl border-0 text-sm outline-none">
-                        <input type="number" id="target_weight" placeholder="目標體重(kg)" class="w-full p-3 bg-blue-50 rounded-2xl border-0 text-sm font-bold outline-none">
+                        <input type="number" id="weight" placeholder="體重(kg)" class="w-full p-3 bg-slate-50 rounded-2xl border-0 text-sm">
+                        <input type="number" id="target_weight" placeholder="目標(kg)" class="w-full p-3 bg-blue-50 rounded-2xl border-0 text-sm font-bold">
                     </div>
-                    <select id="activity" class="w-full p-3 bg-slate-50 rounded-2xl border-0 text-sm outline-none">
-                        <option value="久坐">日常久坐 (Office/學生)</option>
-                        <option value="中度">中度活動 (每週做 2-3 次運動)</option>
-                        <option value="高度">高度活動 (體力勞動/重訓愛好者)</option>
+                    <select id="activity" class="w-full p-3 bg-slate-50 rounded-2xl border-0 text-sm">
+                        <option value="久坐">久坐 (Office/學生)</option>
+                        <option value="適中">每週運動 2-3 次</option>
+                        <option value="高強度">每週運動 5 次以上</option>
                     </select>
-                    <textarea id="habit" placeholder="備註：飲食偏好、舊患、預計減肥時間..." class="w-full p-3 bg-slate-50 rounded-2xl border-0 text-sm h-24 outline-none"></textarea>
-                    
-                    <button onclick="startAiAnalysis()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black text-sm shadow-xl active:scale-95 transition">
-                        啟動 AI 分析與計劃生成 ✨
-                    </button>
+                    <textarea id="habit" placeholder="備註：例如想瘦邊度、有冇病患..." class="w-full p-3 bg-slate-50 rounded-2xl border-0 text-sm h-24"></textarea>
+                    <button onclick="startAiAnalysis()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black text-sm active:scale-95 transition shadow-lg">生成 AI 計劃 ✨</button>
                 </div>
             </div>
         </div>
@@ -56,60 +52,50 @@
         <div id="tab-plan" class="tab-content space-y-6">
             <div id="ai-loading" class="hidden text-center py-20">
                 <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-600 border-t-transparent mb-4"></div>
-                <p class="text-sm text-slate-500 font-bold">AI 導師正在為您計算中...</p>
+                <p class="text-sm text-slate-500 font-bold">AI 導師思考中...</p>
             </div>
 
-            <div id="ai-error" class="hidden bg-red-50 border border-red-200 p-4 rounded-2xl text-red-600 text-xs">
-                <p class="font-bold mb-1">❌ 連線失敗：</p>
-                <code id="error-msg" class="block bg-white/50 p-2 rounded mt-2"></code>
+            <div id="ai-error" class="hidden bg-red-50 p-4 rounded-2xl text-red-600 text-xs">
+                <p class="font-bold">連線失敗：</p>
+                <code id="error-msg" class="block mt-2 opacity-80"></code>
             </div>
 
             <div id="ai-result" class="hidden space-y-6">
-                <div class="mentor-card p-6 rounded-[32px] text-white shadow-2xl">
-                    <h3 class="text-lg font-black italic mb-2 tracking-wide">Mentor's Strategy</h3>
-                    <p id="strategy-text" class="text-xs leading-relaxed opacity-90 mb-4"></p>
-                    <div class="grid grid-cols-2 gap-2">
-                        <div class="bg-white/10 p-3 rounded-xl border border-white/10">
-                            <span class="block text-[8px] opacity-60 uppercase">每日熱量目標</span>
-                            <span id="target-kcal" class="font-bold text-sm"></span> kcal
-                        </div>
-                        <div class="bg-white/10 p-3 rounded-xl border border-white/10">
-                            <span class="block text-[8px] opacity-60 uppercase">建議達成時間</span>
-                            <span id="target-timeline" class="font-bold text-sm"></span>
-                        </div>
+                <div class="bg-slate-900 p-6 rounded-[32px] text-white">
+                    <h3 class="text-lg font-black italic mb-2">Strategy</h3>
+                    <p id="strategy-text" class="text-xs opacity-90 leading-relaxed mb-4"></p>
+                    <div class="text-[10px] grid grid-cols-2 gap-2 opacity-70">
+                        <div>每日熱量: <span id="target-kcal"></span> kcal</div>
+                        <div>預計達成: <span id="target-timeline"></span></div>
                     </div>
                 </div>
                 <div class="bg-white p-6 rounded-[32px] shadow-sm border border-slate-100">
-                    <h4 class="font-bold text-slate-800 mb-3 text-sm flex items-center">🥗 專屬飲食建議</h4>
-                    <div id="diet-plan" class="text-xs text-slate-600 leading-relaxed space-y-2"></div>
+                    <h4 class="font-bold text-slate-800 mb-2 text-sm">🥗 飲食計劃</h4>
+                    <div id="diet-plan" class="text-xs text-slate-600 leading-relaxed"></div>
                 </div>
                 <div class="bg-white p-6 rounded-[32px] shadow-sm border border-slate-100">
-                    <h4 class="font-bold text-slate-800 mb-3 text-sm flex items-center">🏋️ 247 健身清單</h4>
+                    <h4 class="font-bold text-slate-800 mb-2 text-sm">🏋️ 247 健身建議</h4>
                     <div id="workout-plan" class="text-xs text-slate-600 leading-relaxed"></div>
                 </div>
             </div>
         </div>
 
-        <div id="tab-calc" class="tab-content space-y-6">
-            <div class="bg-slate-900 p-10 rounded-[40px] text-white text-center shadow-2xl">
-                <p class="text-slate-400 text-[10px] font-bold uppercase mb-1 tracking-widest">今日剩餘</p>
-                <div class="text-6xl font-black mb-2 tracking-tighter" id="kcal-left">--</div>
-                <div class="text-[10px] opacity-40">目標: <span id="kcal-target-val">--</span> | 已攝取: <span id="kcal-consumed">0</span></div>
+        <div id="tab-calc" class="tab-content space-y-4">
+            <div class="bg-blue-600 p-10 rounded-[40px] text-white text-center shadow-xl">
+                <p class="text-blue-100 text-[10px] font-bold uppercase mb-1">今日剩餘</p>
+                <div class="text-6xl font-black mb-2" id="kcal-left">--</div>
+                <div class="text-[10px] opacity-60">目標: <span id="kcal-target-val">--</span> | 已攝: <span id="kcal-consumed">0</span></div>
             </div>
-            <div class="grid grid-cols-2 gap-4">
-                <button onclick="addKcal(500)" class="bg-white p-6 rounded-[24px] border border-slate-100 shadow-sm text-xs font-black active:bg-slate-50">食咗正餐<br><span class="opacity-40 text-[9px]">+500 kcal</span></button>
-                <button onclick="addKcal(200)" class="bg-white p-6 rounded-[24px] border border-slate-100 shadow-sm text-xs font-black active:bg-slate-50">食咗零食<br><span class="opacity-40 text-[9px]">+200 kcal</span></button>
-            </div>
-            <button onclick="resetKcal()" class="w-full text-[10px] text-slate-300 font-black uppercase tracking-widest pt-4">重設今日紀錄</button>
+            <button onclick="addKcal(500)" class="w-full bg-white p-5 rounded-3xl border border-slate-100 shadow-sm text-xs font-black">紀錄正餐 (+500)</button>
+            <button onclick="resetKcal()" class="w-full text-[10px] text-slate-400 font-bold uppercase pt-4">重設紀錄</button>
         </div>
 
     </main>
 
     <script>
-        // --- 設定 ---
         const API_KEY = "AIzaSyAj2PG2SUPmAq2vh-WA3G3XcZ78VH5rLzQ";
-        // 修正後的 URL 格式
-        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+        // 使用 v1 穩定版網址
+        const API_URL = `https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${API_KEY}`;
         
         let state = { profile: {}, plan: null, consumed: 0 };
 
@@ -118,21 +104,15 @@
             const w = document.getElementById('weight').value;
             const tw = document.getElementById('target_weight').value;
             const h = document.getElementById('height').value;
-            const act = document.getElementById('activity').value;
-            const habit = document.getElementById('habit').value;
+            if(!age || !w || !tw || !h) return alert("請填好資料");
 
-            if(!age || !w || !tw || !h) return alert("請填好基本資料！");
-
-            state.profile = { age, weight: w, target_weight: tw, height: h, activity: act, habit };
-            
             switchTab('plan');
-            window.scrollTo(0,0);
             document.getElementById('ai-loading').classList.remove('hidden');
             document.getElementById('ai-result').classList.add('hidden');
             document.getElementById('ai-error').classList.add('hidden');
 
-            const prompt = `你係專業香港減肥導師。用戶${age}歲, 現時${w}kg, 目標${tw}kg, 身高${h}cm, 活動量${act}, 備註${habit}。
-            請根據以上資料，以地道廣東話生成：[STRATEGY: 分析][KCAL: 數字][TIME: 時間][DIET: 飲食詳情][WORKOUT: 健身詳情]`;
+            const prompt = `你係專業香港減肥導師。用戶${age}歲, 現時${w}kg, 目標${tw}kg, 身高${h}cm, 活動量${document.getElementById('activity').value}。
+            請以地道廣東話提供：[STRATEGY: 分析][KCAL: 數字][TIME: 時間][DIET: 飲食][WORKOUT: 健身]`;
 
             try {
                 const response = await fetch(API_URL, {
@@ -142,10 +122,7 @@
                 });
 
                 const data = await response.json();
-                
-                if (!response.ok) {
-                    throw new Error(data.error ? data.error.message : "未知連線錯誤");
-                }
+                if (!response.ok) throw new Error(data.error ? data.error.message : "API Error");
 
                 const text = data.candidates[0].content.parts[0].text;
                 const extract = (tag) => text.match(new RegExp(`\\[${tag}:\\s*([\\s\\S]*?)\\]`))?.[1] || "未提供";
@@ -157,9 +134,7 @@
                 document.getElementById('workout-plan').innerHTML = extract('WORKOUT').replace(/\n/g, '<br>');
                 
                 state.plan = { targetKcal: parseInt(extract('KCAL')) || 2000 };
-                save();
                 updateCalc();
-
                 document.getElementById('ai-loading').classList.add('hidden');
                 document.getElementById('ai-result').classList.remove('hidden');
             } catch (e) {
@@ -175,26 +150,14 @@
             document.getElementById('tab-' + tab).classList.add('active');
             document.getElementById('btn-' + tab).classList.add('active');
         }
-
-        function addKcal(amt) { state.consumed += amt; updateCalc(); save(); }
-        function resetKcal() { if(confirm("重設今日紀錄？")) { state.consumed = 0; updateCalc(); save(); } }
-
+        function addKcal(amt) { state.consumed += amt; updateCalc(); }
+        function resetKcal() { state.consumed = 0; updateCalc(); }
         function updateCalc() {
             const target = (state.plan && state.plan.targetKcal) ? state.plan.targetKcal : 2000;
             document.getElementById('kcal-target-val').innerText = target;
             document.getElementById('kcal-consumed').innerText = state.consumed;
             document.getElementById('kcal-left').innerText = target - state.consumed;
         }
-
-        function save() { localStorage.setItem('fitCoach_vFinal_Live', JSON.stringify(state)); }
-        function load() {
-            const saved = localStorage.getItem('fitCoach_vFinal_Live');
-            if(saved) {
-                state = JSON.parse(saved);
-                updateCalc();
-            }
-        }
-        load();
     </script>
 </body>
 </html>
