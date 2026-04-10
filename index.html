@@ -3,194 +3,177 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FitCoach AI - Tracker Pro</title>
+    <title>FitCoach AI - 專業健身日記</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+HK:wght@400;700;900&display=swap');
-        body { font-family: 'Noto+Sans+HK', sans-serif; background: #0f172a; color: white; }
+        body { font-family: 'Noto+Sans+HK', sans-serif; background: #0b0f19; color: #ffffff; }
         .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        .nav-btn.active { color: #3b82f6; border-bottom: 3px solid #3b82f6; }
-        .glass-card { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.05); }
-        .task-done { text-decoration: line-through; opacity: 0.4; }
-        input:focus, textarea:focus { outline: 2px solid #3b82f6; }
+        .tab-content.active { display: block; animation: slideUp 0.3s ease-out; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        .nav-btn.active { color: #3b82f6; }
+        .nav-btn.active::after { content: ''; display: block; width: 4px; height: 4px; background: #3b82f6; border-radius: 50%; margin: 2px auto 0; }
+        .app-card { background: #161c2d; border-radius: 24px; border: 1px solid rgba(255,255,255,0.05); }
+        .inner-item { background: rgba(255,255,255,0.03); border-radius: 16px; transition: all 0.2s; }
+        .inner-item:active { background: rgba(59, 130, 246, 0.2); }
+        .checked { opacity: 0.4; text-decoration: line-through; }
     </style>
 </head>
 <body class="pb-24">
 
-    <nav class="bg-slate-900/80 sticky top-0 z-50 px-6 py-4 flex justify-between items-center border-b border-white/5">
-        <h1 class="text-xl font-black tracking-tighter text-blue-500">FITCOACH<span class="text-white">PRO</span></h1>
-        <div class="flex gap-4">
-            <button onclick="switchTab('profile')" id="btn-profile" class="nav-btn active text-[10px] font-black uppercase pb-1">設定</button>
-            <button onclick="switchTab('plan')" id="btn-plan" class="nav-btn text-[10px] font-black uppercase pb-1 text-slate-500">追蹤</button>
-            <button onclick="switchTab('calc')" id="btn-calc" class="nav-btn text-[10px] font-black uppercase pb-1 text-slate-500">熱量</button>
+    <header class="px-6 py-6 flex justify-between items-center sticky top-0 bg-[#0b0f19]/80 backdrop-blur-md z-50">
+        <div>
+            <p class="text-[10px] font-black text-blue-500 uppercase tracking-widest">FitCoach AI</p>
+            <h1 class="text-xl font-black">我的健身日記</h1>
         </div>
-    </nav>
+        <div class="flex gap-4">
+            <button onclick="switchTab('profile')" id="btn-profile" class="nav-btn active text-xs font-bold">設定</button>
+            <button onclick="switchTab('plan')" id="btn-plan" class="nav-btn text-xs font-bold text-slate-500">日記</button>
+            <button onclick="switchTab('week')" id="btn-week" class="nav-btn text-xs font-bold text-slate-500">課表</button>
+            <button onclick="switchTab('stats')" id="btn-stats" class="nav-btn text-xs font-bold text-slate-500">數據</button>
+        </div>
+    </header>
 
     <main class="max-w-md mx-auto p-4 space-y-6">
 
-        <div id="tab-profile" class="tab-content active space-y-4">
-            <div class="glass-card p-6 rounded-[32px]">
-                <h2 class="text-sm font-black text-blue-400 mb-4 uppercase tracking-widest">User Profile</h2>
-                <div class="space-y-4">
-                    <div class="grid grid-cols-2 gap-3">
-                        <input type="number" id="age" placeholder="歲數" class="w-full p-4 bg-slate-800 rounded-2xl border-0 text-sm">
-                        <input type="number" id="height" placeholder="身高 cm" class="w-full p-4 bg-slate-800 rounded-2xl border-0 text-sm">
+        <div id="tab-profile" class="tab-content active">
+            <div class="app-card p-6 space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-slate-500 ml-2">身高 (CM)</label>
+                        <input type="number" id="height" class="w-full p-4 bg-white/5 rounded-2xl border-0 text-sm focus:ring-1 ring-blue-500" placeholder="175">
                     </div>
-                    <div class="grid grid-cols-2 gap-3">
-                        <input type="number" id="weight" placeholder="現時 kg" class="w-full p-4 bg-slate-800 rounded-2xl border-0 text-sm text-blue-400 font-bold">
-                        <input type="number" id="target_weight" placeholder="目標 kg" class="w-full p-4 bg-slate-800 rounded-2xl border-0 text-sm text-green-400 font-bold">
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-slate-500 ml-2">體重 (KG)</label>
+                        <input type="number" id="weight" class="w-full p-4 bg-white/5 rounded-2xl border-0 text-sm text-blue-400 font-bold" placeholder="70">
                     </div>
-                    <textarea id="habit" placeholder="備註：例如「膝頭痛、想減肚腩、去開邊間 24/7...」" class="w-full p-4 bg-slate-800 rounded-2xl border-0 text-sm h-28"></textarea>
-                    <button onclick="startAiAnalysis()" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-black text-sm shadow-xl active:scale-95 transition">
-                        生成今日訓練清單 ⚡️
-                    </button>
                 </div>
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-slate-500 ml-2">目標及備註</label>
+                    <textarea id="habit" class="w-full p-4 bg-white/5 rounded-2xl border-0 text-sm h-28 focus:ring-1 ring-blue-500" placeholder="例如：想練大胸肌、需要素食餐單、膝頭有舊患..."></textarea>
+                </div>
+                <button onclick="startAiAnalysis()" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-2xl font-black text-sm shadow-lg active:scale-[0.98] transition">更新教練計劃</button>
             </div>
         </div>
 
         <div id="tab-plan" class="tab-content space-y-6">
-            <div id="ai-loading" class="hidden text-center py-20">
-                <div class="inline-block animate-spin rounded-full h-10 w-10 border-4 border-blue-600 border-t-transparent mb-4"></div>
-                <p class="text-xs font-bold text-slate-500">教練執緊 24/7 機器清單...</p>
+            <div class="app-card p-5 border-l-4 border-blue-500">
+                <h3 class="text-[10px] font-black text-blue-400 mb-2 uppercase">Coach's Focus</h3>
+                <p id="strategy-text" class="text-sm text-slate-300 leading-relaxed"></p>
             </div>
 
-            <div id="ai-result" class="hidden space-y-6">
-                <div class="glass-card p-6 rounded-[32px] border-l-4 border-blue-500">
-                    <p id="strategy-text" class="text-xs leading-relaxed opacity-80 italic"></p>
-                    <div class="flex gap-4 mt-4">
-                        <div class="text-center bg-white/5 p-3 rounded-2xl flex-1">
-                            <span class="block text-[8px] uppercase opacity-50">目標熱量</span>
-                            <span id="target-kcal" class="text-lg font-black text-blue-400">0</span>
-                        </div>
-                        <div class="text-center bg-white/5 p-3 rounded-2xl flex-1">
-                            <span class="block text-[8px] uppercase opacity-50">預計達成</span>
-                            <span id="target-timeline" class="text-lg font-black text-green-400">0</span>
-                        </div>
-                    </div>
-                </div>
+            <div class="space-y-4">
+                <h4 class="text-xs font-black text-slate-500 ml-2 flex justify-between">
+                    <span>🥗 每日自煮餐單</span>
+                    <span class="text-blue-500" id="daily-kcal">0 kcal</span>
+                </h4>
+                <div id="diet-list" class="space-y-2"></div>
+            </div>
 
-                <div class="space-y-4">
-                    <h4 class="text-xs font-black uppercase tracking-widest text-slate-500">今日時間規劃</h4>
-                    
-                    <div class="glass-card p-4 rounded-3xl space-y-3">
-                        <div class="flex items-center gap-2 mb-2">
-                            <span class="w-2 h-2 rounded-full bg-orange-500"></span>
-                            <span class="text-xs font-bold">飲食安排</span>
-                        </div>
-                        <div id="diet-list" class="space-y-2"></div>
-                    </div>
-
-                    <div class="glass-card p-4 rounded-3xl space-y-3">
-                        <div class="flex items-center gap-2 mb-2">
-                            <span class="w-2 h-2 rounded-full bg-blue-500"></span>
-                            <span class="text-xs font-bold">24/7 機械重訓</span>
-                        </div>
-                        <div id="workout-list" class="space-y-2"></div>
-                    </div>
-                </div>
+            <div class="space-y-4">
+                <h4 class="text-xs font-black text-slate-500 ml-2">🏋️ 訓練組數紀錄</h4>
+                <div id="workout-list" class="space-y-3"></div>
             </div>
         </div>
 
-        <div id="tab-calc" class="tab-content space-y-6">
-            <div class="bg-blue-600 p-10 rounded-[40px] text-white text-center shadow-2xl">
-                <p class="text-white/60 text-[10px] font-black uppercase mb-1">今日剩餘額度</p>
-                <div class="text-7xl font-black mb-4 tracking-tighter" id="kcal-left">--</div>
-                <div class="text-[10px] font-bold bg-black/20 inline-block px-4 py-1 rounded-full">
-                    目標 <span id="kcal-target-val">--</span> | 已食 <span id="kcal-consumed">0</span>
-                </div>
+        <div id="tab-week" class="tab-content space-y-4">
+            <h4 class="text-xs font-black text-slate-500 ml-2 uppercase tracking-widest">7-Day Split Program</h4>
+            <div id="week-list" class="space-y-2"></div>
+        </div>
+
+        <div id="tab-stats" class="tab-content space-y-6">
+            <div class="app-card p-6">
+                <canvas id="weightChart"></canvas>
             </div>
-            
-            <div class="grid grid-cols-2 gap-4">
-                <button onclick="addKcal(400)" class="glass-card p-6 rounded-3xl text-center active:scale-95 transition">
-                    <span class="block text-xl mb-1">🍛</span>
-                    <span class="text-xs font-black">正餐 (+400)</span>
-                </button>
-                <button onclick="addKcal(150)" class="glass-card p-6 rounded-3xl text-center active:scale-95 transition">
-                    <span class="block text-xl mb-1">🍏</span>
-                    <span class="text-xs font-black">零食 (+150)</span>
-                </button>
+            <div class="app-card p-6 flex gap-3">
+                <input type="number" id="today-w" step="0.1" class="flex-1 p-4 bg-white/5 rounded-2xl border-0 text-sm" placeholder="輸入今日體重">
+                <button onclick="logWeight()" class="bg-blue-600 px-6 rounded-2xl font-black text-xs active:scale-95 transition">紀錄</button>
             </div>
-            <button onclick="resetKcal()" class="w-full text-slate-500 text-[10px] font-black uppercase py-4">Reset Data</button>
         </div>
 
     </main>
 
     <script>
         const GROQ_KEY = "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";
-        let state = { plan: { targetKcal: 2000 }, consumed: 0 };
+        let state = { plan: {}, weightHistory: [] };
 
         async function startAiAnalysis() {
-            const age = document.getElementById('age').value;
-            const w = document.getElementById('weight').value;
-            const tw = document.getElementById('target_weight').value;
             const h = document.getElementById('height').value;
+            const w = document.getElementById('weight').value;
             const habit = document.getElementById('habit').value;
 
-            if(!age || !w || !tw || !h) return alert("填晒資料先，教練要睇！");
+            if(!h || !w) return alert("請輸入身高體重！");
 
             switchTab('plan');
-            document.getElementById('ai-loading').classList.remove('hidden');
-            document.getElementById('ai-result').classList.add('hidden');
-
-            const prompt = `你係 24/7 Fitness 嘅地獄教練。
-            用戶資料：${age}歲, ${w}kg, 目標${tw}kg, 身高${h}cm, 備註：${habit}。
-            請以「極度地道廣東話」生成計劃。格式要求：
-            [STRATEGY: 一句起兩句止嘅毒舌激勵]
-            [KCAL: 淨數字]
-            [TIME: 達成周期]
-            [DIET: 格式必須係 "食物名|時間; 食物名|時間" 咁樣列出三餐同零食]
-            [WORKOUT: 格式必須係 "機器名|組數次數; 機器名|組數次數" 列出 24/7 必做機器]`;
+            const prompt = `你係一位專業且細心嘅健身導師。
+            用戶數據：身高${h}cm, 體重${w}kg, 需求：${habit}。
+            請以廣東話生成：
+            [STRATEGY: 分析同鼓勵語]
+            [KCAL: 建議每日熱量]
+            [DIET: 早餐名稱|材料做法; 午餐名稱|材料做法; 晚餐名稱|材料做法; 小食/補劑|材料做法]
+            [WORKOUT: 動作名|重量同組數次數; 動作名|重量同組數次數; 動作名|重量同組數次數]
+            [WEEKLY: 週一:重點|動作; 週二:重點|動作; 週三:重點|動作; 週四:重點|動作; 週五:重點|動作; 週六:重點|動作; 週日:重點|動作]`;
 
             try {
                 const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
                     method: "POST",
                     headers: { "Authorization": `Bearer ${GROQ_KEY}`, "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        model: "llama-3.3-70b-versatile",
-                        messages: [{ role: "user", content: prompt }]
-                    })
+                    body: JSON.stringify({ model: "llama-3.3-70b-versatile", messages: [{ role: "user", content: prompt }] })
                 });
-
                 const data = await response.json();
                 const text = data.choices[0].message.content;
-
                 const extract = (tag) => text.match(new RegExp(`\\[${tag}:\\s*([\\s\\S]*?)\\]`))?.[1]?.trim() || "";
 
-                document.getElementById('strategy-text').innerText = "「" + extract('STRATEGY') + "」";
-                document.getElementById('target-kcal').innerText = extract('KCAL');
-                document.getElementById('target-timeline').innerText = extract('TIME');
+                document.getElementById('strategy-text').innerText = extract('STRATEGY');
+                document.getElementById('daily-kcal').innerText = extract('KCAL') + " kcal";
 
-                // 處理飲食清單 (轉成 Task Checkbox)
+                // 渲染食譜
                 const diets = extract('DIET').split(';');
-                document.getElementById('diet-list').innerHTML = diets.map(d => `
-                    <div class="flex items-center gap-3 p-3 bg-white/5 rounded-xl" onclick="this.classList.toggle('task-done')">
-                        <input type="checkbox" class="rounded border-slate-700 bg-slate-800">
-                        <span class="text-xs text-slate-300">${d.trim()}</span>
-                    </div>
-                `).join('');
-
-                // 處理健身清單 (轉成 Task Checkbox)
-                const workouts = extract('WORKOUT').split(';');
-                document.getElementById('workout-list').innerHTML = workouts.map(w => `
-                    <div class="flex items-center gap-3 p-3 bg-white/5 rounded-xl" onclick="this.classList.toggle('task-done')">
-                        <input type="checkbox" class="rounded border-slate-700 bg-slate-800">
-                        <div class="flex flex-col">
-                            <span class="text-xs font-bold text-blue-300">${w.split('|')[0]}</span>
-                            <span class="text-[10px] text-slate-500">${w.split('|')[1] || '量力而為'}</span>
+                document.getElementById('diet-list').innerHTML = diets.map(d => {
+                    const [title, recipe] = d.split('|');
+                    return `
+                        <div class="inner-item p-4" onclick="this.classList.toggle('checked')">
+                            <p class="text-sm font-bold text-blue-400">${title}</p>
+                            <p class="text-[10px] text-slate-500 mt-1">${recipe || ''}</p>
                         </div>
-                    </div>
-                `).join('');
-                
-                state.plan.targetKcal = parseInt(extract('KCAL')) || 2000;
-                updateCalc();
-                save();
+                    `;
+                }).join('');
 
-                document.getElementById('ai-loading').classList.add('hidden');
-                document.getElementById('ai-result').classList.remove('hidden');
-            } catch (e) {
-                alert("API 爆咗，請重試！");
-            }
+                // 渲染 Gymie 式訓練清單
+                const workouts = extract('WORKOUT').split(';');
+                document.getElementById('workout-list').innerHTML = workouts.map(w => {
+                    const [name, detail] = w.split('|');
+                    return `
+                        <div class="app-card p-4 flex justify-between items-center" onclick="this.classList.toggle('checked')">
+                            <div>
+                                <p class="text-sm font-black">${name}</p>
+                                <p class="text-[10px] text-blue-500 font-bold uppercase tracking-widest mt-1">${detail || ''}</p>
+                            </div>
+                            <div class="w-6 h-6 rounded-full border border-white/10 flex items-center justify-center">
+                                <div class="w-2 h-2 bg-blue-500 rounded-full opacity-0 check-dot"></div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                // 渲染每週
+                const weeks = extract('WEEKLY').split(';');
+                document.getElementById('week-list').innerHTML = weeks.map(wk => {
+                    const [day, info] = wk.split(':');
+                    const [focus, acts] = info.split('|');
+                    return `
+                        <div class="inner-item p-4 flex justify-between items-center">
+                            <span class="text-xs font-black text-slate-500 w-12">${day}</span>
+                            <span class="text-xs font-bold text-blue-400">${focus || 'Rest'}</span>
+                            <span class="text-[10px] text-slate-600">${acts || 'Recovery'}</span>
+                        </div>
+                    `;
+                }).join('');
+
+                state.plan = { kcal: extract('KCAL') };
+                save();
+            } catch (e) { alert("連線超時，請檢查網絡。"); }
         }
 
         function switchTab(tab) {
@@ -198,20 +181,35 @@
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             document.getElementById('tab-' + tab).classList.add('active');
             document.getElementById('btn-' + tab).classList.add('active');
+            if(tab === 'stats') initChart();
         }
 
-        function addKcal(amt) { state.consumed += amt; updateCalc(); save(); }
-        function resetKcal() { state.consumed = 0; updateCalc(); save(); }
-        function updateCalc() {
-            const target = state.plan.targetKcal;
-            document.getElementById('kcal-target-val').innerText = target;
-            document.getElementById('kcal-consumed').innerText = state.consumed;
-            document.getElementById('kcal-left').innerText = target - state.consumed;
+        function logWeight() {
+            const w = document.getElementById('today-w').value;
+            if(!w) return;
+            state.weightHistory.push({ date: new Date().toLocaleDateString('zh-HK', {month:'short', day:'numeric'}), weight: parseFloat(w) });
+            save();
+            initChart();
         }
-        function save() { localStorage.setItem('fit_tracker_v3', JSON.stringify(state)); }
+
+        let chart;
+        function initChart() {
+            const ctx = document.getElementById('weightChart').getContext('2d');
+            if(chart) chart.destroy();
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: state.weightHistory.map(h => h.date),
+                    datasets: [{ data: state.weightHistory.map(h => h.weight), borderColor: '#3b82f6', tension: 0.4, borderJoinStyle: 'round' }]
+                },
+                options: { plugins: { legend: { display: false } }, scales: { y: { grid: { display: false } }, x: { grid: { display: false } } } }
+            });
+        }
+
+        function save() { localStorage.setItem('gymie_fit_v6', JSON.stringify(state)); }
         function load() {
-            const s = localStorage.getItem('fit_tracker_v3');
-            if(s) { state = JSON.parse(s); updateCalc(); }
+            const s = localStorage.getItem('gymie_fit_v6');
+            if(s) state = JSON.parse(s);
         }
         load();
     </script>
