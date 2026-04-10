@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>FitHK AI - 247 Fitness 智能減肥助手</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+HK:wght@400;700;900&display=swap');
+        body { font-family: 'Noto+Sans+HK', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .nav-btn.active { color: #2563eb; border-bottom: 3px solid #2563eb; }
+        .ai-loading { animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .workout-card { transition: all 0.3s ease; }
+        .replacement-mode { border: 2px dashed #3b82f6; background-color: #eff6ff; }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen pb-10">
+
+    <!-- 頂部導航 -->
+    <nav class="bg-white border-b sticky top-0 z-50 px-6 py-3 flex justify-between items-center shadow-sm">
+        <h1 class="text-2xl font-black text-slate-900 tracking-tighter">Fit<span class="text-blue-600">HK</span></h1>
+        <div class="flex gap-6">
+            <button onclick="switchTab('plan')" id="btn-plan" class="nav-btn active text-sm font-bold pb-1 text-slate-400">AI/健身</button>
+            <button onclick="switchTab('calc')" id="btn-calc" class="nav-btn text-sm font-bold pb-1 text-slate-400">紀錄</button>
+            <button onclick="switchTab('stats')" id="btn-stats" class="nav-btn text-sm font-bold pb-1 text-slate-400">進度</button>
+        </div>
+    </nav>
+
+    <main class="max-w-md mx-auto p-4 space-y-6">
+
+        <!-- TAB 1: AI 智能與 247 健身 -->
+        <div id="tab-plan" class="tab-content active space-y-6">
+            <!-- Gemini AI 生成區 -->
+            <div class="bg-gradient-to-br from-indigo-600 to-blue-700 p-6 rounded-[32px] text-white shadow-xl">
+                <h3 class="font-bold mb-2 flex items-center text-lg">
+                    <span class="mr-2">✨</span> Gemini 智能助教
+                </h3>
+                <textarea id="ai-input" placeholder="今日會食譚仔，點食最健康？" class="w-full p-4 rounded-2xl border-0 text-sm text-slate-800 mb-3 h-20 focus:ring-4 focus:ring-blue-400/50 outline-none shadow-inner"></textarea>
+                <button onclick="askGemini()" id="ai-btn" class="w-full bg-white text-blue-600 py-3 rounded-2xl font-black text-sm active:scale-95 transition">生成個人化建議</button>
+                <div id="ai-response-container" class="hidden mt-4 p-4 bg-white/10 rounded-2xl text-xs text-blue-50 leading-relaxed border border-white/20">
+                    <div id="ai-response-text"></div>
+                    <div id="ai-quick-add" class="hidden mt-3 pt-3 border-t border-white/20">
+                        <button id="add-ai-kcal-btn" class="w-full bg-white text-blue-700 px-4 py-2 rounded-xl text-[10px] font-bold shadow-sm"></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 247 健身器械 Plan -->
+            <div class="space-y-4">
+                <h3 class="font-bold text-slate-800 px-2 flex justify-between items-center">
+                    💪 247 Fitness 訓練
+                    <span class="text-[10px] font-normal text-slate-400">有人用緊？可點擊按鈕替換</span>
+                </h3>
+                <div id="workout-container" class="space-y-4"></div>
+            </div>
+        </div>
+
+        <!-- TAB 2: 卡路里計算機 -->
+        <div id="tab-calc" class="tab-content space-y-6">
+            <div class="bg-slate-900 p-8 rounded-[40px] text-white text-center shadow-xl">
+                <p class="text-slate-400 text-xs font-bold uppercase mb-1">今日剩餘預算</p>
+                <div class="text-6xl font-black mb-2" id="kcal-left">--</div>
+                <div class="text-xs opacity-50">攝取: <span id="kcal-consumed">0</span> / 目標: <span id="kcal-target-val">--</span></div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <button onclick="triggerSOS()" class="bg-red-50 text-red-600 p-4 rounded-3xl font-bold text-sm border border-red-100">🆘 宵夜 SOS</button>
+                <button onclick="resetDailyKcal()" class="bg-slate-100 text-slate-600 p-4 rounded-3xl font-bold text-sm">🔄 每日重設</button>
+            </div>
+
+            <div class="bg-white rounded-3xl shadow-sm border p-4">
+                <h3 class="font-bold text-sm mb-4 text-slate-400 px-2">常用地道紀錄</h3>
+                <div class="grid grid-cols-1 gap-2" id="food-menu">
+                    <!-- Food items injected by JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: 進度與設定 -->
+        <div id="tab-stats" class="tab-content space-y-6">
+            <div class="bg-white p-6 rounded-3xl shadow-sm border">
+                <h3 class="font-bold mb-4">⚙️ 設定與目標</h3>
+                <div class="space-y-4">
+                    <div>
+                        <label class="text-[10px] text-slate-400 uppercase font-bold">目前體重 (kg)</label>
+                        <input type="number" id="user-weight" class="w-full p-3 bg-slate-50 rounded-xl border-0 text-sm mt-1">
+                    </div>
+                    <button onclick="updateSettings()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold text-sm">更新數據</button>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-3xl shadow-sm border">
+                <h3 class="font-bold mb-4">🏆 247 打卡紀錄 (本週)</h3>
+                <div class="flex gap-3 justify-center mb-6" id="workout-dots"></div>
+                <button onclick="addWorkoutDot()" class="w-full bg-orange-50 text-orange-600 py-3 rounded-xl font-bold text-xs border border-orange-100">我今日去咗 247!</button>
+            </div>
+
+            <div class="bg-white p-6 rounded-3xl shadow-sm border">
+                <h3 class="font-bold mb-4">📉 體重紀錄歷史</h3>
+                <div id="weight-history" class="space-y-2 text-sm text-slate-600"></div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // --- 核心配置 ---
+        const API_KEY = "AIzaSyAj2PG2SUPmAq2vh-WA3G3XcZ78VH5rLzQ";
+        let state = {
+            weight: 75,
+            target: 2000,
+            consumed: 0,
+            workoutCount: 0,
+            isAlt: { chest: false, back: false, legs: false },
+            weightHistory: [],
+            lastCorrectionDate: null
+        };
+
+        const workoutData = [
+            { id: 'chest', primary: { name: "坐姿推胸機 (Chest Press)", desc: "主要練胸。手柄對準胸口，發力前推。" }, alt: { name: "啞鈴臥推 (Dumbbell Press)", desc: "機有人？用啞鈴喺長凳向上推，效果一樣。" } },
+            { id: 'back', primary: { name: "高位下拉 (Lat Pulldown)", desc: "闊握橫桿拉至鎖骨，感受背部發力。" }, alt: { name: "單臂划船 (Dumbbell Row)", desc: "搵張凳一手撐住，另一手攞啞鈴向上拉。" } },
+            { id: 'legs', primary: { name: "腿部推蹬機 (Leg Press)", desc: "踩板推起，膝頭唔好完全鎖死。" }, alt: { name: "高杯深蹲 (Goblet Squat)", desc: "抱住啞鈴做深蹲，唔洗排隊。" } }
+        ];
+
+        const foods = [
+            { name: "譚仔雞肉米線(清湯)", kcal: 480 },
+            { name: "7-11 雞胸肉", kcal: 125 },
+            { name: "大家樂切雞飯(去皮)", kcal: 520 },
+            { name: "魚蛋(6粒走汁)", kcal: 80 }
+        ];
+
+        // --- 頁面邏輯 ---
+        function init() {
+            const saved = localStorage.getItem('fitHK_pro_data');
+            if (saved) state = JSON.parse(saved);
+            renderAll();
+            renderFoodMenu();
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('tab-' + tab).classList.add('active');
+            document.getElementById('btn-' + tab).classList.add('active');
+        }
+
+        function renderAll() {
+            // 更新卡路里數字
+            document.getElementById('kcal-left').innerText = state.target - state.consumed;
+            document.getElementById('kcal-consumed').innerText = state.consumed;
+            document.getElementById('kcal-target-val').innerText = state.target;
+            document.getElementById('user-weight').value = state.weight;
+
+            // 更新健身卡片
+            const container = document.getElementById('workout-container');
+            container.innerHTML = workoutData.map(ex => {
+                const isAlt = state.isAlt[ex.id];
+                const cur = isAlt ? ex.alt : ex.primary;
+                return `
+                    <div class="workout-card bg-white p-5 rounded-3xl shadow-sm border ${isAlt?'replacement-mode':'border-slate-100'}">
+                        <div class="flex justify-between items-start mb-2">
+                            <h4 class="font-bold text-sm text-slate-800">${cur.name}</h4>
+                            <button onclick="toggleAlt('${ex.id}')" class="text-[10px] ${isAlt?'text-blue-600 font-bold':'text-slate-400'}">
+                                ${isAlt ? '← 返回機台' : '🔄 有人用緊？'}
+                            </button>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-3">${cur.desc}</p>
+                        <div class="grid grid-cols-3 gap-2 text-[10px] text-center font-bold">
+                            <div class="bg-slate-50 py-1 rounded-lg text-slate-400">3 組</div>
+                            <div class="bg-slate-50 py-1 rounded-lg text-slate-400">12 次</div>
+                            <div class="bg-slate-50 py-1 rounded-lg text-slate-400">60s 休息</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // 更新打卡點
+            let dots = "";
+            for(let i=0; i<4; i++) {
+                dots += `<div class="w-6 h-6 rounded-full ${i < state.workoutCount ? 'bg-orange-500 shadow-md shadow-orange-200' : 'bg-slate-200'}"></div>`;
+            }
+            document.getElementById('workout-dots').innerHTML = dots;
+
+            // 更新歷史
+            document.getElementById('weight-history').innerHTML = state.weightHistory.slice(0, 5).map(h => `
+                <div class="flex justify-between border-b border-slate-50 pb-2">
+                    <span class="text-slate-400">${h.date}</span><span class="font-bold">${h.val} kg</span>
+                </div>
+            `).join('');
+        }
+
+        function renderFoodMenu() {
+            document.getElementById('food-menu').innerHTML = foods.map(f => `
+                <button onclick="addKcal(${f.kcal})" class="flex justify-between p-4 bg-slate-50 rounded-2xl text-xs active:bg-blue-50 transition">
+                    <span class="font-bold text-slate-600">${f.name}</span>
+                    <span class="text-blue-500 font-black">${f.kcal} kcal</span>
+                </button>
+            `).join('');
+        }
+
+        // --- 功能邏輯 ---
+        async function askGemini() {
+            const input = document.getElementById('ai-input').value;
+            if(!input) return;
+            
+            const btn = document.getElementById('ai-btn');
+            const resContainer = document.getElementById('ai-response-container');
+            const resText = document.getElementById('ai-response-text');
+            const quickAdd = document.getElementById('ai-quick-add');
+            
+            btn.disabled = true;
+            btn.innerText = "Gemini 思考中...";
+            resContainer.classList.remove('hidden');
+            resText.innerHTML = "<p class='ai-loading'>正在生成專業建議...</p>";
+            quickAdd.classList.add('hidden');
+
+            const prompt = `你係地道香港健身教練。用戶體重 ${state.weight}kg，目標熱量 ${state.target}kcal。要求：${input}。請用廣東話答。結尾必須另起一行用呢個格式：[CAL: 數字]`;
+            
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                });
+                const data = await response.json();
+                const text = data.candidates[0].content.parts[0].text;
+                
+                const calMatch = text.match(/\[CAL:\s*(\d+)\]/);
+                resText.innerHTML = text.replace(/\[CAL:.*?\]/g, '').replace(/\n/g, '<br>');
+                
+                if(calMatch) {
+                    const cal = calMatch[1];
+                    quickAdd.classList.remove('hidden');
+                    const addBtn = document.getElementById('add-ai-kcal-btn');
+                    addBtn.innerText = `紀錄此餐熱量 (+${cal} kcal)`;
+                    addBtn.onclick = () => { addKcal(parseInt(cal)); alert("已紀錄！"); quickAdd.classList.add('hidden'); };
+                }
+            } catch (e) {
+                resText.innerText = "API 連線失敗，請檢查 Key。";
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "生成個人化建議";
+            }
+        }
+
+        function addKcal(amt) {
+            state.consumed += amt;
+            const hr = new Date().getHours();
+            if(hr >= 22 || hr <= 4) state.lastCorrectionDate = new Date().toLocaleDateString();
+            save();
+            renderAll();
+        }
+
+        function updateSettings() {
+            state.weight = parseInt(document.getElementById('user-weight').value);
+            state.target = Math.round(state.weight * 28);
+            state.weightHistory.unshift({ date: new Date().toLocaleDateString(), val: state.weight });
+            save();
+            renderAll();
+            alert("設定已儲存，目標熱量已自動調整！");
+        }
+
+        function toggleAlt(id) {
+            state.isAlt[id] = !state.isAlt[id];
+            save();
+            renderAll();
+        }
+
+        function addWorkoutDot() {
+            if(state.workoutCount < 4) state.workoutCount++;
+            save();
+            renderAll();
+        }
+
+        function resetDailyKcal() {
+            if(confirm("重設今日進度？")) {
+                state.consumed = 0;
+                save();
+                renderAll();
+            }
+        }
+
+        function triggerSOS() {
+            alert("🆘 宵夜救急：\n1. 先飲 300ml 暖水\n2. 仲餓？食 7-11 烚蛋或少量藍莓\n3. 聽朝個餐單我會自動幫你調輕！");
+        }
+
+        function save() { localStorage.setItem('fitHK_pro_data', JSON.stringify(state)); }
+
+        init();
+    </script>
+</body>
+</html>
