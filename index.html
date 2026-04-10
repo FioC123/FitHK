@@ -3,19 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FitCoach AI - 穩定版</title>
+    <title>FitCoach AI - Groq 穩定版</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+HK:wght@400;700;900&display=swap');
-        body { font-family: 'Noto+Sans+HK', sans-serif; background-color: #f8fafc; }
+        body { font-family: 'Noto+Sans+HK', sans-serif; background-color: #f1f5f9; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-        .nav-btn.active { color: #2563eb; border-bottom: 2px solid #2563eb; }
+        .nav-btn.active { color: #2563eb; border-bottom: 3px solid #2563eb; }
+        .mentor-card { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); }
     </style>
 </head>
 <body class="min-h-screen pb-20">
 
-    <nav class="bg-white border-b sticky top-0 z-50 px-6 py-4 flex justify-between items-center">
+    <nav class="bg-white border-b sticky top-0 z-50 px-6 py-4 flex justify-between items-center shadow-sm">
         <h1 class="text-xl font-black text-slate-900">FitCoach<span class="text-blue-600">AI</span></h1>
         <div class="flex gap-4">
             <button onclick="switchTab('profile')" id="btn-profile" class="nav-btn active text-xs font-bold pb-1">設定</button>
@@ -25,25 +26,29 @@
     </nav>
 
     <main class="max-w-md mx-auto p-4 space-y-6">
+
         <div id="tab-profile" class="tab-content active space-y-4">
             <div class="bg-white p-6 rounded-[32px] shadow-sm border border-slate-100">
-                <h2 class="text-lg font-black text-slate-800 mb-4">輸入個人資料</h2>
+                <h2 class="text-lg font-black text-slate-800 mb-4 text-center">你的私人減肥導師 (Groq)</h2>
                 <div class="space-y-4">
                     <div class="grid grid-cols-2 gap-3">
                         <input type="number" id="age" placeholder="年齡" class="w-full p-3 bg-slate-50 rounded-2xl border-0 text-sm outline-none">
                         <input type="number" id="height" placeholder="身高(cm)" class="w-full p-3 bg-slate-50 rounded-2xl border-0 text-sm outline-none">
                     </div>
                     <div class="grid grid-cols-2 gap-3">
-                        <input type="number" id="weight" placeholder="體重(kg)" class="w-full p-3 bg-slate-50 rounded-2xl border-0 text-sm outline-none">
-                        <input type="number" id="target_weight" placeholder="目標(kg)" class="w-full p-3 bg-blue-50 rounded-2xl border-0 text-sm font-bold outline-none">
+                        <input type="number" id="weight" placeholder="現時體重(kg)" class="w-full p-3 bg-slate-50 rounded-2xl border-0 text-sm outline-none">
+                        <input type="number" id="target_weight" placeholder="目標體重(kg)" class="w-full p-3 bg-blue-50 rounded-2xl border-0 text-sm font-bold outline-none">
                     </div>
                     <select id="activity" class="w-full p-3 bg-slate-50 rounded-2xl border-0 text-sm outline-none">
-                        <option value="久坐">久坐 (Office/學生)</option>
-                        <option value="適中">每週運動 2-3 次</option>
-                        <option value="高強度">每週運動 5 次以上</option>
+                        <option value="久坐">日常久坐 (Office/學生)</option>
+                        <option value="中度">中度活動 (每週做 2-3 次運動)</option>
+                        <option value="高度">高度活動 (體力勞動/重訓愛好者)</option>
                     </select>
-                    <textarea id="habit" placeholder="備註：飲食偏好、舊患..." class="w-full p-3 bg-slate-50 rounded-2xl border-0 text-sm h-24 outline-none"></textarea>
-                    <button onclick="startAiAnalysis()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black text-sm active:scale-95 transition shadow-lg">啟動 AI 教練 ✨</button>
+                    <textarea id="habit" placeholder="備註：飲食偏好、舊患、有冇食開 Supplement..." class="w-full p-3 bg-slate-50 rounded-2xl border-0 text-sm h-24 outline-none"></textarea>
+                    
+                    <button onclick="startAiAnalysis()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black text-sm shadow-xl active:scale-95 transition">
+                        啟動 AI 分析 ✨
+                    </button>
                 </div>
             </div>
         </div>
@@ -51,81 +56,115 @@
         <div id="tab-plan" class="tab-content space-y-6">
             <div id="ai-loading" class="hidden text-center py-20">
                 <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-600 border-t-transparent mb-4"></div>
-                <p class="text-sm text-slate-500 font-bold">AI 教練正在設計方案...</p>
+                <p class="text-sm text-slate-500 font-bold">Groq AI 正在火速計算中...</p>
             </div>
-            <div id="ai-error" class="hidden bg-red-50 p-4 rounded-2xl text-red-600 text-[10px]">
-                <p class="font-bold mb-1">連線錯誤：</p>
-                <code id="error-msg" class="block break-words opacity-80"></code>
-            </div>
+
             <div id="ai-result" class="hidden space-y-6">
-                <!-- AI 結果顯示區域 -->
-                <div class="bg-slate-900 p-6 rounded-[32px] text-white">
-                    <h3 class="text-lg font-black italic mb-2">Strategy</h3>
-                    <p id="strategy-text" class="text-xs opacity-90 leading-relaxed mb-4"></p>
-                    <div class="text-[10px] grid grid-cols-2 gap-2 opacity-70">
-                        <div>每日熱量: <span id="target-kcal" class="text-blue-400 font-bold"></span> kcal</div>
-                        <div>達成時間: <span id="target-timeline" class="text-blue-400 font-bold"></span></div>
+                <div class="mentor-card p-6 rounded-[32px] text-white shadow-2xl">
+                    <h3 class="text-lg font-black italic mb-2 tracking-wide">Mentor's Strategy</h3>
+                    <p id="strategy-text" class="text-xs leading-relaxed opacity-90 mb-4"></p>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div class="bg-white/10 p-3 rounded-xl border border-white/10">
+                            <span class="block text-[8px] opacity-60 uppercase">每日熱量目標</span>
+                            <span id="target-kcal" class="font-bold text-sm"></span> kcal
+                        </div>
+                        <div class="bg-white/10 p-3 rounded-xl border border-white/10">
+                            <span class="block text-[8px] opacity-60 uppercase">建議達成時間</span>
+                            <span id="target-timeline" class="font-bold text-sm"></span>
+                        </div>
                     </div>
                 </div>
-                <div id="diet-plan" class="bg-white p-6 rounded-[32px] shadow-sm border border-slate-100 text-xs text-slate-600 leading-relaxed"></div>
-                <div id="workout-plan" class="bg-white p-6 rounded-[32px] shadow-sm border border-slate-100 text-xs text-slate-600 leading-relaxed"></div>
+                <div class="bg-white p-6 rounded-[32px] shadow-sm border border-slate-100">
+                    <h4 class="font-bold text-slate-800 mb-3 text-sm flex items-center">🥗 飲食方案</h4>
+                    <div id="diet-plan" class="text-xs text-slate-600 leading-relaxed space-y-2"></div>
+                </div>
+                <div class="bg-white p-6 rounded-[32px] shadow-sm border border-slate-100">
+                    <h4 class="font-bold text-slate-800 mb-3 text-sm flex items-center">🏋️ 運動清單</h4>
+                    <div id="workout-plan" class="text-xs text-slate-600 leading-relaxed"></div>
+                </div>
             </div>
         </div>
+
+        <div id="tab-calc" class="tab-content space-y-4">
+            <div class="bg-slate-900 p-10 rounded-[40px] text-white text-center shadow-xl">
+                <p class="text-slate-400 text-[10px] font-bold uppercase mb-1 tracking-widest">今日剩餘</p>
+                <div class="text-6xl font-black mb-2 tracking-tighter" id="kcal-left">--</div>
+                <div class="text-[10px] opacity-40">目標: <span id="kcal-target-val">--</span> | 已攝: <span id="kcal-consumed">0</span></div>
+            </div>
+            <button onclick="addKcal(500)" class="w-full bg-white p-6 rounded-[24px] border border-slate-100 shadow-sm text-xs font-black active:bg-slate-50">紀錄一餐 (+500 kcal)</button>
+            <button onclick="resetKcal()" class="w-full text-[10px] text-slate-300 font-black uppercase tracking-widest pt-4">重設今日數據</button>
+        </div>
+
     </main>
 
     <script>
-        const API_KEY = "AIzaSyAj2PG2SUPmAq2vh-WA3G3XcZ78VH5rLzQ";
-        
-        // 核心修正：確保 URL 路徑包含正確的模型識別碼
-        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
-        
-        let state = { plan: null, consumed: 0 };
+        // 使用你提供的 Groq API Key
+        const GROQ_KEY = "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";
+        let state = { profile: {}, plan: null, consumed: 0 };
 
         async function startAiAnalysis() {
             const age = document.getElementById('age').value;
             const w = document.getElementById('weight').value;
             const tw = document.getElementById('target_weight').value;
             const h = document.getElementById('height').value;
-            if(!age || !w || !tw || !h) return alert("請填好資料");
+            const act = document.getElementById('activity').value;
+            const habit = document.getElementById('habit').value;
 
+            if(!age || !w || !tw || !h) return alert("填好資料先啦！");
+
+            state.profile = { age, weight: w, target_weight: tw, height: h, activity: act, habit };
+            
             switchTab('plan');
+            window.scrollTo(0,0);
             document.getElementById('ai-loading').classList.remove('hidden');
             document.getElementById('ai-result').classList.add('hidden');
-            document.getElementById('ai-error').classList.add('hidden');
 
-            const prompt = `你係專業香港減肥導師。用戶${age}歲, 現時${w}kg, 目標${tw}kg, 身高${h}cm, 活動量${document.getElementById('activity').value}。
-            請以廣東話生成：[STRATEGY: 分析][KCAL: 數字][TIME: 時間][DIET: 飲食詳情][WORKOUT: 健身詳情]`;
+            const prompt = `你係一位玩開 24/7 Fitness 嘅專業香港教練。
+            用戶資料：${age}歲, 現時${w}kg, 目標${tw}kg, 身高${h}cm, 活動量${act}, 備註${habit}。
+            請以極度地道廣東話 (用「係、唔係、咁樣、囉」等字眼) 生成以下內容，並嚴格遵守標籤格式：
+            [STRATEGY: 用教練口吻分析情況]
+            [KCAL: 只寫數字，例如 1800]
+            [TIME: 預計幾耐達成]
+            [DIET: 三餐建議]
+            [WORKOUT: 建議去 24/7 玩咩機]`;
 
             try {
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${GROQ_KEY}`,
+                        "Content-Type": "application/json"
+                    },
                     body: JSON.stringify({
-                        contents: [{ parts: [{ text: prompt }] }]
+                        model: "llama-3.3-70b-versatile",
+                        messages: [{ role: "user", content: prompt }],
+                        temperature: 0.7
                     })
                 });
 
                 const data = await response.json();
-                if (!response.ok) throw new Error(JSON.stringify(data.error));
+                const text = data.choices[0].message.content;
 
-                const text = data.candidates[0].content.parts[0].text;
                 const extract = (tag) => {
                     const match = text.match(new RegExp(`\\[${tag}:\\s*([\\s\\S]*?)\\]`));
-                    return match ? match[1].trim() : "未提供";
+                    return match ? match[1].trim() : "AI 冇提供呢項資料";
                 };
 
                 document.getElementById('strategy-text').innerText = extract('STRATEGY');
                 document.getElementById('target-kcal').innerText = extract('KCAL');
                 document.getElementById('target-timeline').innerText = extract('TIME');
-                document.getElementById('diet-plan').innerHTML = `<b>🥗 飲食建議：</b><br>${extract('DIET').replace(/\n/g, '<br>')}`;
-                document.getElementById('workout-plan').innerHTML = `<b>🏋️ 運動建議：</b><br>${extract('WORKOUT').replace(/\n/g, '<br>')}`;
+                document.getElementById('diet-plan').innerHTML = extract('DIET').replace(/\n/g, '<br>');
+                document.getElementById('workout-plan').innerHTML = extract('WORKOUT').replace(/\n/g, '<br>');
                 
+                state.plan = { targetKcal: parseInt(extract('KCAL')) || 2000 };
+                updateCalc();
+                save();
+
                 document.getElementById('ai-loading').classList.add('hidden');
                 document.getElementById('ai-result').classList.remove('hidden');
             } catch (e) {
-                document.getElementById('ai-loading').classList.add('hidden');
-                document.getElementById('ai-error').classList.remove('hidden');
-                document.getElementById('error-msg').innerText = e.message;
+                alert("Groq API 連線失敗，請檢查網絡或 Key 是否正確。");
+                console.error(e);
             }
         }
 
@@ -135,6 +174,26 @@
             document.getElementById('tab-' + tab).classList.add('active');
             document.getElementById('btn-' + tab).classList.add('active');
         }
+
+        function addKcal(amt) { state.consumed += amt; updateCalc(); save(); }
+        function resetKcal() { state.consumed = 0; updateCalc(); save(); }
+
+        function updateCalc() {
+            const target = (state.plan && state.plan.targetKcal) ? state.plan.targetKcal : 2000;
+            document.getElementById('kcal-target-val').innerText = target;
+            document.getElementById('kcal-consumed').innerText = state.consumed;
+            document.getElementById('kcal-left').innerText = target - state.consumed;
+        }
+
+        function save() { localStorage.setItem('fitCoach_groq_data', JSON.stringify(state)); }
+        function load() {
+            const saved = localStorage.getItem('fitCoach_groq_data');
+            if(saved) {
+                state = JSON.parse(saved);
+                updateCalc();
+            }
+        }
+        load();
     </script>
 </body>
 </html>
