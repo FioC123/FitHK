@@ -14,71 +14,78 @@
         @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
         .nav-btn.active { color: #3b82f6; }
         .nav-btn.active::after { content: ''; display: block; width: 4px; height: 4px; background: #3b82f6; border-radius: 50%; margin: 2px auto 0; }
-        .app-card { background: #161c2d; border-radius: 24px; border: 1px solid rgba(255,255,255,0.05); }
-        .inner-item { background: rgba(255,255,255,0.03); border-radius: 16px; transition: all 0.2s; }
-        .inner-item:active { background: rgba(59, 130, 246, 0.2); }
-        .checked { opacity: 0.4; text-decoration: line-through; }
+        .app-card { background: #161c2d; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); }
+        .task-checked { border-color: #3b82f6 !important; background: rgba(59, 130, 246, 0.1) !important; }
+        .task-checked .text-main { color: rgba(255,255,255,0.3); text-decoration: line-through; }
+        .task-checked .text-sub { opacity: 0.2; }
     </style>
 </head>
 <body class="pb-24">
 
-    <header class="px-6 py-6 flex justify-between items-center sticky top-0 bg-[#0b0f19]/80 backdrop-blur-md z-50">
+    <header class="px-6 py-6 flex justify-between items-center sticky top-0 bg-[#0b0f19]/90 backdrop-blur-md z-50 border-b border-white/5">
         <div>
-            <p class="text-[10px] font-black text-blue-500 uppercase tracking-widest">FitCoach AI</p>
-            <h1 class="text-xl font-black">我的健身日記</h1>
+            <p class="text-[10px] font-black text-blue-500 uppercase tracking-[0.2em]">FitCoach Pro</p>
+            <h1 class="text-xl font-black">個人化計劃</h1>
         </div>
         <div class="flex gap-4">
             <button onclick="switchTab('profile')" id="btn-profile" class="nav-btn active text-xs font-bold">設定</button>
-            <button onclick="switchTab('plan')" id="btn-plan" class="nav-btn text-xs font-bold text-slate-500">日記</button>
+            <button onclick="switchTab('plan')" id="btn-plan" class="nav-btn text-xs font-bold text-slate-500">今日</button>
             <button onclick="switchTab('week')" id="btn-week" class="nav-btn text-xs font-bold text-slate-500">課表</button>
-            <button onclick="switchTab('stats')" id="btn-stats" class="nav-btn text-xs font-bold text-slate-500">數據</button>
+            <button onclick="switchTab('stats')" id="btn-stats" class="nav-btn text-xs font-bold text-slate-500">趨勢</button>
         </div>
     </header>
 
     <main class="max-w-md mx-auto p-4 space-y-6">
 
         <div id="tab-profile" class="tab-content active">
-            <div class="app-card p-6 space-y-4">
+            <div class="app-card p-6 space-y-5 shadow-2xl">
                 <div class="grid grid-cols-2 gap-4">
-                    <div class="space-y-1">
-                        <label class="text-[10px] font-bold text-slate-500 ml-2">身高 (CM)</label>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black text-slate-500 uppercase ml-1">年齡 AGE</label>
+                        <input type="number" id="age" class="w-full p-4 bg-white/5 rounded-2xl border-0 text-sm focus:ring-1 ring-blue-500" placeholder="25">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black text-slate-500 uppercase ml-1">身高 CM</label>
                         <input type="number" id="height" class="w-full p-4 bg-white/5 rounded-2xl border-0 text-sm focus:ring-1 ring-blue-500" placeholder="175">
                     </div>
-                    <div class="space-y-1">
-                        <label class="text-[10px] font-bold text-slate-500 ml-2">體重 (KG)</label>
-                        <input type="number" id="weight" class="w-full p-4 bg-white/5 rounded-2xl border-0 text-sm text-blue-400 font-bold" placeholder="70">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black text-slate-500 uppercase ml-1">現時 KG</label>
+                        <input type="number" id="weight" class="w-full p-4 bg-white/5 rounded-2xl border-0 text-sm font-bold text-blue-400" placeholder="75">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black text-slate-500 uppercase ml-1">目標 KG</label>
+                        <input type="number" id="target_weight" class="w-full p-4 bg-white/5 rounded-2xl border-0 text-sm font-bold text-green-400" placeholder="65">
                     </div>
                 </div>
-                <div class="space-y-1">
-                    <label class="text-[10px] font-bold text-slate-500 ml-2">目標及備註</label>
-                    <textarea id="habit" class="w-full p-4 bg-white/5 rounded-2xl border-0 text-sm h-28 focus:ring-1 ring-blue-500" placeholder="例如：想練大胸肌、需要素食餐單、膝頭有舊患..."></textarea>
+                <div class="space-y-2">
+                    <label class="text-[10px] font-black text-slate-500 uppercase ml-1">個人需求備註</label>
+                    <textarea id="habit" class="w-full p-4 bg-white/5 rounded-2xl border-0 text-sm h-28 focus:ring-1 ring-blue-500 leading-relaxed" placeholder="例如：想練腹肌、改善體態、平日自煮..."></textarea>
                 </div>
-                <button onclick="startAiAnalysis()" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-2xl font-black text-sm shadow-lg active:scale-[0.98] transition">更新教練計劃</button>
+                <button onclick="startAiAnalysis()" id="gen-btn" class="w-full bg-blue-600 py-4 rounded-2xl font-black text-sm shadow-xl active:scale-[0.97] transition">
+                    更新專業日記計劃 ✨
+                </button>
             </div>
         </div>
 
         <div id="tab-plan" class="tab-content space-y-6">
             <div class="app-card p-5 border-l-4 border-blue-500">
-                <h3 class="text-[10px] font-black text-blue-400 mb-2 uppercase">Coach's Focus</h3>
-                <p id="strategy-text" class="text-sm text-slate-300 leading-relaxed"></p>
+                <h3 class="text-[10px] font-black text-blue-400 mb-2 uppercase tracking-widest">Mentor Analysis</h3>
+                <p id="strategy-text" class="text-xs text-slate-400 leading-relaxed"></p>
             </div>
-
-            <div class="space-y-4">
-                <h4 class="text-xs font-black text-slate-500 ml-2 flex justify-between">
-                    <span>🥗 每日自煮餐單</span>
-                    <span class="text-blue-500" id="daily-kcal">0 kcal</span>
-                </h4>
+            <div class="space-y-3">
+                <h4 class="text-[10px] font-black text-slate-500 uppercase ml-1 tracking-widest">🥗 今日自煮餐單</h4>
                 <div id="diet-list" class="space-y-2"></div>
             </div>
-
-            <div class="space-y-4">
-                <h4 class="text-xs font-black text-slate-500 ml-2">🏋️ 訓練組數紀錄</h4>
-                <div id="workout-list" class="space-y-3"></div>
+            <div class="space-y-3">
+                <h4 class="text-[10px] font-black text-slate-500 uppercase ml-1 tracking-widest">🏋️ 今日訓練任務</h4>
+                <div id="workout-list" class="space-y-2"></div>
             </div>
         </div>
 
         <div id="tab-week" class="tab-content space-y-4">
-            <h4 class="text-xs font-black text-slate-500 ml-2 uppercase tracking-widest">7-Day Split Program</h4>
+            <h4 class="text-[10px] font-black text-slate-500 uppercase ml-1 tracking-widest">7-Day Split Program</h4>
             <div id="week-list" class="space-y-2"></div>
         </div>
 
@@ -86,33 +93,35 @@
             <div class="app-card p-6">
                 <canvas id="weightChart"></canvas>
             </div>
-            <div class="app-card p-6 flex gap-3">
-                <input type="number" id="today-w" step="0.1" class="flex-1 p-4 bg-white/5 rounded-2xl border-0 text-sm" placeholder="輸入今日體重">
-                <button onclick="logWeight()" class="bg-blue-600 px-6 rounded-2xl font-black text-xs active:scale-95 transition">紀錄</button>
+            <div class="flex gap-3">
+                <input type="number" id="today-w" step="0.1" class="flex-1 p-4 bg-[#161c2d] rounded-2xl border-0 text-sm" placeholder="輸入今日體重">
+                <button onclick="logWeight()" class="bg-blue-600 px-8 rounded-2xl font-black text-xs">紀錄</button>
             </div>
         </div>
-
     </main>
 
     <script>
         const GROQ_KEY = "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";
-        let state = { plan: {}, weightHistory: [] };
+        let state = { weightHistory: [] };
 
         async function startAiAnalysis() {
+            const age = document.getElementById('age').value;
             const h = document.getElementById('height').value;
             const w = document.getElementById('weight').value;
+            const tw = document.getElementById('target_weight').value;
             const habit = document.getElementById('habit').value;
+            const btn = document.getElementById('gen-btn');
 
-            if(!h || !w) return alert("請輸入身高體重！");
+            if(!age || !h || !w || !tw) return alert("請填好年齡、身高、現時體重同目標體重！");
+            
+            btn.innerText = "教練分析中...";
+            btn.disabled = true;
 
-            switchTab('plan');
-            const prompt = `你係一位專業且細心嘅健身導師。
-            用戶數據：身高${h}cm, 體重${w}kg, 需求：${habit}。
-            請以廣東話生成：
-            [STRATEGY: 分析同鼓勵語]
-            [KCAL: 建議每日熱量]
-            [DIET: 早餐名稱|材料做法; 午餐名稱|材料做法; 晚餐名稱|材料做法; 小食/補劑|材料做法]
-            [WORKOUT: 動作名|重量同組數次數; 動作名|重量同組數次數; 動作名|重量同組數次數]
+            const prompt = `你係一位專業導師。用戶數據：${age}歲, ${h}cm, 現時${w}kg, 目標${tw}kg, 需求：${habit}。
+            請以廣東話生成專業計劃：
+            [STRATEGY: 分析點樣由${w}kg減到${tw}kg]
+            [DIET: 早餐|做法; 午餐|做法; 晚餐|做法]
+            [WORKOUT: 動作名|重量組數; 動作名|重量組數; 動作名|重量組數]
             [WEEKLY: 週一:重點|動作; 週二:重點|動作; 週三:重點|動作; 週四:重點|動作; 週五:重點|動作; 週六:重點|動作; 週日:重點|動作]`;
 
             try {
@@ -126,54 +135,41 @@
                 const extract = (tag) => text.match(new RegExp(`\\[${tag}:\\s*([\\s\\S]*?)\\]`))?.[1]?.trim() || "";
 
                 document.getElementById('strategy-text').innerText = extract('STRATEGY');
-                document.getElementById('daily-kcal').innerText = extract('KCAL') + " kcal";
-
-                // 渲染食譜
-                const diets = extract('DIET').split(';');
-                document.getElementById('diet-list').innerHTML = diets.map(d => {
-                    const [title, recipe] = d.split('|');
-                    return `
-                        <div class="inner-item p-4" onclick="this.classList.toggle('checked')">
-                            <p class="text-sm font-bold text-blue-400">${title}</p>
-                            <p class="text-[10px] text-slate-500 mt-1">${recipe || ''}</p>
-                        </div>
-                    `;
-                }).join('');
-
-                // 渲染 Gymie 式訓練清單
-                const workouts = extract('WORKOUT').split(';');
-                document.getElementById('workout-list').innerHTML = workouts.map(w => {
-                    const [name, detail] = w.split('|');
-                    return `
-                        <div class="app-card p-4 flex justify-between items-center" onclick="this.classList.toggle('checked')">
-                            <div>
-                                <p class="text-sm font-black">${name}</p>
-                                <p class="text-[10px] text-blue-500 font-bold uppercase tracking-widest mt-1">${detail || ''}</p>
-                            </div>
-                            <div class="w-6 h-6 rounded-full border border-white/10 flex items-center justify-center">
-                                <div class="w-2 h-2 bg-blue-500 rounded-full opacity-0 check-dot"></div>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-
+                
+                // 渲染飲食
+                renderList('diet-list', extract('DIET'), '🥗');
+                // 渲染運動
+                renderList('workout-list', extract('WORKOUT'), '🏋️');
                 // 渲染每週
-                const weeks = extract('WEEKLY').split(';');
+                const weeks = extract('WEEKLY').split(';').filter(i => i.includes(':'));
                 document.getElementById('week-list').innerHTML = weeks.map(wk => {
                     const [day, info] = wk.split(':');
-                    const [focus, acts] = info.split('|');
-                    return `
-                        <div class="inner-item p-4 flex justify-between items-center">
-                            <span class="text-xs font-black text-slate-500 w-12">${day}</span>
-                            <span class="text-xs font-bold text-blue-400">${focus || 'Rest'}</span>
-                            <span class="text-[10px] text-slate-600">${acts || 'Recovery'}</span>
-                        </div>
-                    `;
+                    const [focus, detail] = (info || '').split('|');
+                    return `<div class="bg-white/5 p-4 rounded-2xl flex justify-between items-center">
+                        <span class="text-[10px] font-black text-slate-500 w-10">${day.trim()}</span>
+                        <span class="text-xs font-bold text-blue-400">${focus ? focus.trim() : '休息'}</span>
+                        <span class="text-[10px] text-slate-600">${detail ? detail.trim() : 'Recovery'}</span>
+                    </div>`;
                 }).join('');
 
-                state.plan = { kcal: extract('KCAL') };
-                save();
-            } catch (e) { alert("連線超時，請檢查網絡。"); }
+                switchTab('plan');
+                saveToLocal('user_profile', {age, h, w, tw, habit});
+            } catch (e) { alert("API 連線失敗，請重試"); }
+            finally { btn.innerText = "更新專業日記計劃 ✨"; btn.disabled = false; }
+        }
+
+        function renderList(id, raw, icon) {
+            const items = raw.split(';').filter(i => i.includes('|'));
+            document.getElementById(id).innerHTML = items.map(item => {
+                const [name, detail] = item.split('|');
+                return `<div class="app-card p-4 flex items-center justify-between" onclick="this.classList.toggle('task-checked')">
+                    <div class="flex-1">
+                        <p class="text-sm font-bold text-main">${name.trim()}</p>
+                        <p class="text-[10px] text-slate-500 mt-1 text-sub">${detail ? detail.trim() : ''}</p>
+                    </div>
+                    <div class="w-5 h-5 border-2 border-white/10 rounded-md check-box"></div>
+                </div>`;
+            }).join('');
         }
 
         function switchTab(tab) {
@@ -188,7 +184,7 @@
             const w = document.getElementById('today-w').value;
             if(!w) return;
             state.weightHistory.push({ date: new Date().toLocaleDateString('zh-HK', {month:'short', day:'numeric'}), weight: parseFloat(w) });
-            save();
+            saveToLocal('gymie_fit_v8', state);
             initChart();
         }
 
@@ -200,18 +196,25 @@
                 type: 'line',
                 data: {
                     labels: state.weightHistory.map(h => h.date),
-                    datasets: [{ data: state.weightHistory.map(h => h.weight), borderColor: '#3b82f6', tension: 0.4, borderJoinStyle: 'round' }]
+                    datasets: [{ data: state.weightHistory.map(h => h.weight), borderColor: '#3b82f6', tension: 0.4 }]
                 },
-                options: { plugins: { legend: { display: false } }, scales: { y: { grid: { display: false } }, x: { grid: { display: false } } } }
+                options: { plugins: { legend: { display: false } } }
             });
         }
 
-        function save() { localStorage.setItem('gymie_fit_v6', JSON.stringify(state)); }
-        function load() {
-            const s = localStorage.getItem('gymie_fit_v6');
-            if(s) state = JSON.parse(s);
+        function saveToLocal(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
+        
+        // 初始化載入
+        const savedProfile = JSON.parse(localStorage.getItem('user_profile') || '{}');
+        if(savedProfile.age) {
+            document.getElementById('age').value = savedProfile.age;
+            document.getElementById('height').value = savedProfile.h;
+            document.getElementById('weight').value = savedProfile.w;
+            document.getElementById('target_weight').value = savedProfile.tw;
+            document.getElementById('habit').value = savedProfile.habit;
         }
-        load();
+        const savedStats = JSON.parse(localStorage.getItem('gymie_fit_v8') || '{"weightHistory":[]}');
+        state = savedStats;
     </script>
 </body>
 </html>
