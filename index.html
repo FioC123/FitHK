@@ -3,101 +3,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FitCoach AI - 專業健身日記</title>
+    <title>FitCoach Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+HK:wght@400;700;900&display=swap');
-        body { font-family: 'Noto+Sans+HK', sans-serif; background: #0b0f19; color: #ffffff; }
+        body { font-family: 'Noto+Sans+HK', sans-serif; background: #0b0f19; color: #ffffff; -webkit-tap-highlight-color: transparent; }
         .tab-content { display: none; }
-        .tab-content.active { display: block; animation: slideUp 0.3s ease-out; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-        .nav-btn.active { color: #3b82f6; }
-        .nav-btn.active::after { content: ''; display: block; width: 4px; height: 4px; background: #3b82f6; border-radius: 50%; margin: 2px auto 0; }
-        .app-card { background: #161c2d; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); }
-        .task-checked { border-color: #3b82f6 !important; background: rgba(59, 130, 246, 0.1) !important; }
-        .task-checked .text-main { color: rgba(255,255,255,0.3); text-decoration: line-through; }
-        .task-checked .text-sub { opacity: 0.2; }
+        .tab-content.active { display: block; animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .app-card { background: #161c2d; border-radius: 24px; border: 1px solid rgba(255,255,255,0.03); }
+        .nav-btn.active { color: #3b82f6; position: relative; }
+        .nav-btn.active::after { content: ''; position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; background: #3b82f6; border-radius: 50%; }
+        
+        /* Being Sport Timeline Dot */
+        .timeline-item { position: relative; padding-left: 20px; }
+        .timeline-item::before { content: ''; position: absolute; left: 0px; top: 10px; width: 8px; height: 8px; border-radius: 50%; background: #3b82f6; box-shadow: 0 0 10px #3b82f6; }
+        .diet-item::before { background: #f97316; box-shadow: 0 0 10px #f97316; }
+
+        .task-checked { opacity: 0.3; filter: grayscale(1); border: 1px dashed rgba(255,255,255,0.1) !important; background: transparent !important; }
+        input, textarea { outline: none !important; }
     </style>
 </head>
 <body class="pb-24">
 
-    <header class="px-6 py-6 flex justify-between items-center sticky top-0 bg-[#0b0f19]/90 backdrop-blur-md z-50 border-b border-white/5">
+    <header class="px-8 py-8 flex justify-between items-end sticky top-0 bg-[#0b0f19]/90 backdrop-blur-xl z-50">
         <div>
-            <p class="text-[10px] font-black text-blue-500 uppercase tracking-[0.2em]">FitCoach Pro</p>
-            <h1 class="text-xl font-black">個人化計劃</h1>
+            <p class="text-[10px] font-black text-blue-500 uppercase tracking-[0.3em] mb-1">FitCoach Pro</p>
+            <h1 class="text-2xl font-black tracking-tight" id="header-title">個人化計劃</h1>
         </div>
-        <div class="flex gap-4">
-            <button onclick="switchTab('profile')" id="btn-profile" class="nav-btn active text-xs font-bold">設定</button>
-            <button onclick="switchTab('plan')" id="btn-plan" class="nav-btn text-xs font-bold text-slate-500">今日</button>
-            <button onclick="switchTab('week')" id="btn-week" class="nav-btn text-xs font-bold text-slate-500">課表</button>
-            <button onclick="switchTab('stats')" id="btn-stats" class="nav-btn text-xs font-bold text-slate-500">趨勢</button>
+        <div class="flex gap-5 text-xs font-bold text-slate-500">
+            <button onclick="switchTab('profile')" id="btn-profile" class="nav-btn active">設定</button>
+            <button onclick="switchTab('plan')" id="btn-plan" class="nav-btn">今日</button>
+            <button onclick="switchTab('week')" id="btn-week" class="nav-btn">課表</button>
+            <button onclick="switchTab('stats')" id="btn-stats" class="nav-btn">趨勢</button>
         </div>
     </header>
 
-    <main class="max-w-md mx-auto p-4 space-y-6">
+    <main class="max-w-md mx-auto px-6 space-y-8">
 
-        <div id="tab-profile" class="tab-content active">
-            <div class="app-card p-6 space-y-5 shadow-2xl">
+        <div id="tab-profile" class="tab-content active space-y-6">
+            <div class="app-card p-6 space-y-6">
                 <div class="grid grid-cols-2 gap-4">
                     <div class="space-y-2">
-                        <label class="text-[10px] font-black text-slate-500 uppercase ml-1">年齡 AGE</label>
-                        <input type="number" id="age" class="w-full p-4 bg-white/5 rounded-2xl border-0 text-sm focus:ring-1 ring-blue-500" placeholder="25">
+                        <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">年齡 Age</label>
+                        <input type="number" id="age" class="w-full p-4 bg-white/5 rounded-2xl border-0 text-sm" placeholder="25">
                     </div>
                     <div class="space-y-2">
-                        <label class="text-[10px] font-black text-slate-500 uppercase ml-1">身高 CM</label>
-                        <input type="number" id="height" class="w-full p-4 bg-white/5 rounded-2xl border-0 text-sm focus:ring-1 ring-blue-500" placeholder="175">
+                        <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">身高 CM</label>
+                        <input type="number" id="height" class="w-full p-4 bg-white/5 rounded-2xl border-0 text-sm" placeholder="175">
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div class="space-y-2">
-                        <label class="text-[10px] font-black text-slate-500 uppercase ml-1">現時 KG</label>
+                        <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">現時 KG</label>
                         <input type="number" id="weight" class="w-full p-4 bg-white/5 rounded-2xl border-0 text-sm font-bold text-blue-400" placeholder="75">
                     </div>
                     <div class="space-y-2">
-                        <label class="text-[10px] font-black text-slate-500 uppercase ml-1">目標 KG</label>
+                        <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">目標 KG</label>
                         <input type="number" id="target_weight" class="w-full p-4 bg-white/5 rounded-2xl border-0 text-sm font-bold text-green-400" placeholder="65">
                     </div>
                 </div>
                 <div class="space-y-2">
-                    <label class="text-[10px] font-black text-slate-500 uppercase ml-1">個人需求備註</label>
-                    <textarea id="habit" class="w-full p-4 bg-white/5 rounded-2xl border-0 text-sm h-28 focus:ring-1 ring-blue-500 leading-relaxed" placeholder="例如：想練腹肌、改善體態、平日自煮..."></textarea>
+                    <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">個人需求 (如：膝痛、自煮)</label>
+                    <textarea id="habit" class="w-full p-4 bg-white/5 rounded-2xl border-0 text-sm h-24 resize-none" placeholder="想減肚腩、有膝頭舊患..."></textarea>
                 </div>
-                <button onclick="startAiAnalysis()" id="gen-btn" class="w-full bg-blue-600 py-4 rounded-2xl font-black text-sm shadow-xl active:scale-[0.97] transition">
-                    更新專業日記計劃 ✨
+                <button onclick="startAiAnalysis()" id="gen-btn" class="w-full bg-blue-600 py-5 rounded-2xl font-black text-sm shadow-[0_0_20px_rgba(59,130,246,0.3)] active:scale-95 transition-all">
+                    更新 Groq AI 計劃 ✨
                 </button>
             </div>
         </div>
 
-        <div id="tab-plan" class="tab-content space-y-6">
-            <div class="app-card p-5 border-l-4 border-blue-500">
-                <h3 class="text-[10px] font-black text-blue-400 mb-2 uppercase tracking-widest">Mentor Analysis</h3>
-                <p id="strategy-text" class="text-xs text-slate-400 leading-relaxed"></p>
+        <div id="tab-plan" class="tab-content space-y-8">
+            <div class="app-card p-6 border-l-4 border-blue-500 bg-gradient-to-br from-blue-500/10 to-transparent">
+                <h3 class="text-[10px] font-black text-blue-400 mb-2 uppercase tracking-[0.2em]">Mentor Analysis</h3>
+                <p id="strategy-text" class="text-xs text-slate-300 leading-relaxed italic">請先設定個人資料...</p>
             </div>
-            <div class="space-y-3">
-                <h4 class="text-[10px] font-black text-slate-500 uppercase ml-1 tracking-widest">🥗 今日自煮餐單</h4>
-                <div id="diet-list" class="space-y-2"></div>
+
+            <div class="space-y-4">
+                <h4 class="text-[10px] font-black text-slate-500 uppercase tracking-widest">🥗 飲食安排</h4>
+                <div id="diet-list" class="space-y-3"></div>
             </div>
-            <div class="space-y-3">
-                <h4 class="text-[10px] font-black text-slate-500 uppercase ml-1 tracking-widest">🏋️ 今日訓練任務</h4>
-                <div id="workout-list" class="space-y-2"></div>
+
+            <div class="space-y-4">
+                <h4 class="text-[10px] font-black text-slate-500 uppercase tracking-widest">🏋️ 訓練任務</h4>
+                <div id="workout-list" class="space-y-3"></div>
             </div>
         </div>
 
         <div id="tab-week" class="tab-content space-y-4">
-            <h4 class="text-[10px] font-black text-slate-500 uppercase ml-1 tracking-widest">7-Day Split Program</h4>
             <div id="week-list" class="space-y-2"></div>
         </div>
 
         <div id="tab-stats" class="tab-content space-y-6">
-            <div class="app-card p-6">
-                <canvas id="weightChart"></canvas>
-            </div>
+            <div class="app-card p-6"><canvas id="weightChart"></canvas></div>
             <div class="flex gap-3">
-                <input type="number" id="today-w" step="0.1" class="flex-1 p-4 bg-[#161c2d] rounded-2xl border-0 text-sm" placeholder="輸入今日體重">
+                <input type="number" id="today-w" step="0.1" class="flex-1 p-4 bg-[#161c2d] rounded-2xl border-0 text-sm" placeholder="輸入體重">
                 <button onclick="logWeight()" class="bg-blue-600 px-8 rounded-2xl font-black text-xs">紀錄</button>
             </div>
         </div>
+
     </main>
 
     <script>
@@ -112,16 +118,16 @@
             const habit = document.getElementById('habit').value;
             const btn = document.getElementById('gen-btn');
 
-            if(!age || !h || !w || !tw) return alert("請填好年齡、身高、現時體重同目標體重！");
+            if(!age || !h || !w || !tw) return alert("請填寫完整數據");
             
-            btn.innerText = "教練分析中...";
+            btn.innerText = "Groq 正在快速運算...";
             btn.disabled = true;
 
-            const prompt = `你係一位專業導師。用戶數據：${age}歲, ${h}cm, 現時${w}kg, 目標${tw}kg, 需求：${habit}。
-            請以廣東話生成專業計劃：
-            [STRATEGY: 分析點樣由${w}kg減到${tw}kg]
+            const prompt = `你係專業健身導師。用戶：${age}歲, ${h}cm, 現時${w}kg -> 目標${tw}kg, 需求：${habit}。
+            請以廣東話生成：
+            [STRATEGY:一句到位戰略]
             [DIET: 早餐|做法; 午餐|做法; 晚餐|做法]
-            [WORKOUT: 動作名|重量組數; 動作名|重量組數; 動作名|重量組數]
+            [WORKOUT: 動作|組數; 動作|組數; 動作|組數]
             [WEEKLY: 週一:重點|動作; 週二:重點|動作; 週三:重點|動作; 週四:重點|動作; 週五:重點|動作; 週六:重點|動作; 週日:重點|動作]`;
 
             try {
@@ -130,46 +136,46 @@
                     headers: { "Authorization": `Bearer ${GROQ_KEY}`, "Content-Type": "application/json" },
                     body: JSON.stringify({ model: "llama-3.3-70b-versatile", messages: [{ role: "user", content: prompt }] })
                 });
+
                 const data = await response.json();
-                const text = data.choices[0].message.content;
-                const extract = (tag) => text.match(new RegExp(`\\[${tag}:\\s*([\\s\\S]*?)\\]`))?.[1]?.trim() || "";
+                const resText = data.choices[0].message.content;
+                const extract = (tag) => resText.match(new RegExp(`\\[${tag}:\\s*([\\s\\S]*?)\\]`))?.[1]?.trim() || "";
 
                 document.getElementById('strategy-text').innerText = extract('STRATEGY');
                 
-                // 渲染飲食
-                renderList('diet-list', extract('DIET'), '🥗');
-                // 渲染運動
-                renderList('workout-list', extract('WORKOUT'), '🏋️');
-                // 渲染每週
-                const weeks = extract('WEEKLY').split(';').filter(i => i.includes(':'));
-                document.getElementById('week-list').innerHTML = weeks.map(wk => {
+                // 渲染 Diet
+                document.getElementById('diet-list').innerHTML = extract('DIET').split(';').map(i => {
+                    const [n, d] = i.split('|');
+                    return `<div class="app-card p-4 flex items-center justify-between timeline-item diet-item" onclick="this.classList.toggle('task-checked')">
+                        <div><p class="text-sm font-bold">${n}</p><p class="text-[10px] text-slate-500 mt-0.5">${d||''}</p></div>
+                        <div class="w-5 h-5 border border-white/10 rounded-lg flex items-center justify-center"><div class="w-2 h-2 bg-orange-500 rounded-sm opacity-0 check-mark"></div></div>
+                    </div>`;
+                }).join('');
+
+                // 渲染 Workout
+                document.getElementById('workout-list').innerHTML = extract('WORKOUT').split(';').map(i => {
+                    const [n, s] = i.split('|');
+                    return `<div class="app-card p-4 flex items-center justify-between timeline-item" onclick="this.classList.toggle('task-checked')">
+                        <div><p class="text-sm font-black uppercase tracking-tight">${n}</p><p class="text-[10px] text-blue-500 font-bold mt-0.5">${s||''}</p></div>
+                        <div class="w-5 h-5 border border-white/10 rounded-lg"></div>
+                    </div>`;
+                }).join('');
+
+                // 渲染 Weekly
+                document.getElementById('week-list').innerHTML = extract('WEEKLY').split(';').map(wk => {
                     const [day, info] = wk.split(':');
-                    const [focus, detail] = (info || '').split('|');
+                    const [focus, acts] = (info || '').split('|');
                     return `<div class="bg-white/5 p-4 rounded-2xl flex justify-between items-center">
-                        <span class="text-[10px] font-black text-slate-500 w-10">${day.trim()}</span>
-                        <span class="text-xs font-bold text-blue-400">${focus ? focus.trim() : '休息'}</span>
-                        <span class="text-[10px] text-slate-600">${detail ? detail.trim() : 'Recovery'}</span>
+                        <span class="text-[10px] font-black text-slate-500 w-10">${day}</span>
+                        <span class="text-xs font-bold text-blue-400">${focus||'休息'}</span>
+                        <span class="text-[10px] text-slate-600">${acts||'Recovery'}</span>
                     </div>`;
                 }).join('');
 
                 switchTab('plan');
-                saveToLocal('user_profile', {age, h, w, tw, habit});
-            } catch (e) { alert("API 連線失敗，請重試"); }
-            finally { btn.innerText = "更新專業日記計劃 ✨"; btn.disabled = false; }
-        }
-
-        function renderList(id, raw, icon) {
-            const items = raw.split(';').filter(i => i.includes('|'));
-            document.getElementById(id).innerHTML = items.map(item => {
-                const [name, detail] = item.split('|');
-                return `<div class="app-card p-4 flex items-center justify-between" onclick="this.classList.toggle('task-checked')">
-                    <div class="flex-1">
-                        <p class="text-sm font-bold text-main">${name.trim()}</p>
-                        <p class="text-[10px] text-slate-500 mt-1 text-sub">${detail ? detail.trim() : ''}</p>
-                    </div>
-                    <div class="w-5 h-5 border-2 border-white/10 rounded-md check-box"></div>
-                </div>`;
-            }).join('');
+                localStorage.setItem('fitcoach_profile', JSON.stringify({age, h, w, tw, habit}));
+            } catch (e) { alert("Groq API 連線失敗"); }
+            finally { btn.innerText = "更新 Groq AI 計劃 ✨"; btn.disabled = false; }
         }
 
         function switchTab(tab) {
@@ -177,6 +183,8 @@
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             document.getElementById('tab-' + tab).classList.add('active');
             document.getElementById('btn-' + tab).classList.add('active');
+            const titles = { 'profile': '設定個人資料', 'plan': '今日日記', 'week': '每週課表', 'stats': '數據趨勢' };
+            document.getElementById('header-title').innerText = titles[tab];
             if(tab === 'stats') initChart();
         }
 
@@ -184,7 +192,7 @@
             const w = document.getElementById('today-w').value;
             if(!w) return;
             state.weightHistory.push({ date: new Date().toLocaleDateString('zh-HK', {month:'short', day:'numeric'}), weight: parseFloat(w) });
-            saveToLocal('gymie_fit_v8', state);
+            localStorage.setItem('fitcoach_stats', JSON.stringify(state));
             initChart();
         }
 
@@ -202,10 +210,8 @@
             });
         }
 
-        function saveToLocal(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
-        
-        // 初始化載入
-        const savedProfile = JSON.parse(localStorage.getItem('user_profile') || '{}');
+        // 載入緩存
+        const savedProfile = JSON.parse(localStorage.getItem('fitcoach_profile') || '{}');
         if(savedProfile.age) {
             document.getElementById('age').value = savedProfile.age;
             document.getElementById('height').value = savedProfile.h;
@@ -213,8 +219,7 @@
             document.getElementById('target_weight').value = savedProfile.tw;
             document.getElementById('habit').value = savedProfile.habit;
         }
-        const savedStats = JSON.parse(localStorage.getItem('gymie_fit_v8') || '{"weightHistory":[]}');
-        state = savedStats;
+        state = JSON.parse(localStorage.getItem('fitcoach_stats') || '{"weightHistory":[]}');
     </script>
 </body>
 </html>
